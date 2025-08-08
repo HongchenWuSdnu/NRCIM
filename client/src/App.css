@@ -1,0 +1,31 @@
+.logo {
+  height: 32px;
+  margin: 16px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.site-layout .site-layout-background {
+  background: #fff;
+}
+
+.ant-layout-sider-children {
+  height: 100vh;
+  position: fixed;
+  left: 0;
+}
+
+.ant-layout-sider {
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.ant-layout {
+  padding-left: 200px;
+}
+
+.ant-layout-sider-collapsed + .ant-layout .ant-layout {
+  padding-left: 80px;
+} 

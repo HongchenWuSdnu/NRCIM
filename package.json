@@ -1,0 +1,33 @@
+{
+  "name": "natural-resource-management-system",
+  "version": "1.0.0",
+  "description": "自然资源地理信息分类分级与多尺度安全指标体系构建系统",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "init-data": "node init-data.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "sqlite3": "^5.1.6",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0",
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "自然资源",
+    "地理信息",
+    "指标体系",
+    "分类分级"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
