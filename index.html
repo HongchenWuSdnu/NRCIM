@@ -3,190 +3,217 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NRCIM 页面设计（纯前端静态版）</title>
+  <title>自然资源敏感性分级判别与采集安全指标体系演示面板</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e2e8f0;--line:#1e293b;--accent:#38bdf8;--ok:#22c55e;--warn:#f59e0b;--err:#ef4444;
+      --sidebar:#062b52; --sidebar-2:#071f3a; --primary:#2563eb; --bg:#f6f7fb; --card:#fff; --text:#0f172a; --muted:#6b7280; --line:#e5e7eb;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:linear-gradient(180deg,#0b1220 0%,#0b1020 100%);} 
-    .wrap{max-width:1080px;margin:32px auto;padding:0 16px}
-    .header{display:flex;align-items:center;gap:14px;margin-bottom:16px}
-    .logo{width:36px;height:36px;border-radius:10px;background:radial-gradient(circle at 30% 30%,#60a5fa,transparent 40%), radial-gradient(circle at 70% 70%,#22d3ee,transparent 40%), #0ea5e9;box-shadow:0 10px 30px rgba(14,165,233,.25)}
-    h1{font-size:22px;margin:0;font-weight:800}
-    .sub{color:var(--muted);font-size:14px;margin-top:2px}
+    body{margin:0; background:var(--bg); color:var(--text); font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    .layout{display:grid; grid-template-columns:260px 1fr; min-height:100vh}
 
-    .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
-    .btn{border:1px solid var(--line);background:#0b1426;padding:8px 12px;border-radius:12px;color:var(--text);cursor:pointer}
-    .btn:hover{background:#0e1a33}
-    .btn.ghost{background:transparent}
+    /* Sidebar */
+    .side{background:linear-gradient(180deg,var(--sidebar),var(--sidebar-2)); color:#e6efff; position:sticky; top:0; height:100vh;}
+    .brand{display:flex; align-items:center; gap:10px; padding:18px 16px; border-bottom:1px solid rgba(255,255,255,.08)}
+    .logo{width:34px;height:34px;border-radius:10px;background:radial-gradient(circle at 30% 30%,#60a5fa,transparent 40%), radial-gradient(circle at 70% 70%,#22d3ee,transparent 40%), #1d4ed8; box-shadow:0 8px 26px rgba(37,99,235,.35)}
+    .brand h1{font-size:15px; font-weight:800; margin:0}
+    .nav{padding:10px}
+    .nav a{display:flex; align-items:center; gap:8px; padding:10px 12px; color:#dbeafe; border-radius:10px; text-decoration:none; font-size:14px; border:1px solid transparent}
+    .nav a:hover{background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.08)}
+    .nav a.active{background:#0b3a78; border-color:#0b3a78}
 
-    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-    .panel{grid-column:span 12;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+    /* Main */
+    .main{padding:22px 26px}
+    .title{font-size:18px; font-weight:800; margin-bottom:14px}
 
-    /* Stats */
-    .stats{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-    .stat{grid-column:span 3;min-width:180px;background:#0b1426;border:1px solid var(--line);border-radius:14px;padding:14px}
-    .stat h3{margin:0 0 6px;font-size:13px;color:var(--muted)}
-    .stat .num{font-size:28px;font-weight:800;letter-spacing:.5px}
-    .tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#cbd5e1;padding:3px 8px;border:1px solid var(--line);border-radius:999px;background:#0b1426}
+    .cards{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:16px}
+    .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 6px 20px rgba(0,0,0,.04)}
+    .card h3{margin:0 0 4px; font-size:13px; color:var(--muted); font-weight:600}
+    .card .num{font-weight:800; font-size:26px}
+    .card .hint{font-size:12px; color:var(--muted)}
 
-    /* Tables */
-    .tbl{width:100%;border-collapse:separate;border-spacing:0 8px;font-size:14px}
-    .tbl thead th{color:var(--muted);font-weight:600;text-align:left;padding:6px 10px}
-    .tbl tbody tr{background:#0b1426;border:1px solid var(--line)}
-    .tbl tbody tr td{padding:10px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-    .tbl tbody tr td:first-child{border-left:1px solid var(--line);border-top-left-radius:12px;border-bottom-left-radius:12px}
-    .tbl tbody tr td:last-child{border-right:1px solid var(--line);border-top-right-radius:12px;border-bottom-right-radius:12px}
+    .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px}
+    .panel{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 6px 20px rgba(0,0,0,.04)}
+    .panel h2{margin:0 0 10px; font-size:14px}
+    .chart{width:100%; height:300px}
 
-    /* Log */
-    .log{white-space:pre-wrap;background:#0b1020;border:1px dashed #1f2a44;color:#cde2ff;padding:12px;border-radius:12px;min-height:120px}
-    .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;margin-left:8px}
-    .pill.ok{background:rgba(34,197,94,.15);color:#86efac}
-    .pill.warn{background:rgba(245,158,11,.15);color:#fde68a}
+    .table{background:var(--card); border:1px solid var(--line); border-radius:16px; overflow:hidden}
+    table{width:100%; border-collapse:separate; border-spacing:0}
+    thead th{font-size:12px; text-align:left; color:#64748b; padding:10px 12px; background:#f8fafc; border-bottom:1px solid var(--line)}
+    tbody td{padding:12px; border-bottom:1px solid var(--line); font-size:14px}
+    tbody tr:hover{background:#f9fbff}
+    .badge{display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; background:#eff6ff; color:#1d4ed8; border:1px solid #dbeafe}
 
-    /* Responsive */
-    @media (max-width:920px){ .stat{grid-column:span 6} }
-    @media (max-width:600px){ .stat{grid-column:span 12} }
+    @media (max-width:1100px){ .layout{grid-template-columns:72px 1fr} .brand h1{display:none} .nav a span{display:none} }
+    @media (max-width:920px){ .cards{grid-template-columns:repeat(2,1fr)} .grid{grid-template-columns:1fr} }
+    @media (max-width:560px){ .cards{grid-template-columns:1fr} .main{padding:16px} }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="header">
-      <div class="logo" aria-hidden="true"></div>
-      <div>
-        <h1>NRCIM 自然资源认知—集成—赋能 面板</h1>
-        <div class="sub">纯静态页面设计（不含数据库），用于演示信息架构与视觉风格</div>
+  <div class="layout">
+    <aside class="side">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <h1>NRCIM 控制台</h1>
       </div>
-    </div>
+      <nav class="nav">
+        <a href="#" class="active">📊 <span>仪表盘</span></a>
+        <a href="#">🧭 <span>区域模块</span></a>
+        <a href="#">🧩 <span>功能模块</span></a>
+        <a href="#">📚 <span>指标字典</span></a>
+        <a href="#">⚙️ <span>系统设置</span></a>
+      </nav>
+    </aside>
 
-    <div class="toolbar">
-      <button class="btn">初始化面板</button>
-      <button class="btn">刷新概览</button>
-      <button class="btn ghost">导出预览</button>
-      <span class="tag">版本 <strong>v0.1 UI</strong></span>
-    </div>
+    <main class="main">
+      <div class="title">自然资源敏感性分级判别与采集安全指标体系演示系统</div>
 
-    <!-- 概览统计 -->
-    <div class="panel">
-      <div class="stats">
-        <div class="stat">
-          <h3>指标（Indicators）</h3>
+      <!-- Top stats cards -->
+      <section class="cards" aria-label="统计概览">
+        <div class="card">
+          <h3>资源类型</h3>
+          <div class="num">4</div>
+          <div class="hint">气候 / 地表覆盖 / 水 / 土地</div>
+        </div>
+        <div class="card">
+          <h3>指标总数</h3>
           <div class="num">16</div>
-          <div class="sub">覆盖四大资源类型的三级指标体系</div>
+          <div class="hint">三级指标体系</div>
         </div>
-        <div class="stat">
-          <h3>区域模块（Regions）</h3>
+        <div class="card">
+          <h3>区域数</h3>
           <div class="num">6</div>
-          <div class="sub">陆地水面区/植被覆盖区/裸地区/…</div>
+          <div class="hint">陆地水面区 · 植被覆盖区 · 裸地区 · 冰川-冻土区 · 过渡区 · 海岸区</div>
         </div>
-        <div class="stat">
-          <h3>功能模块（Modules）</h3>
-          <div class="num">8</div>
-          <div class="sub">归类模块 ×4 · 相互作用 ×1 · 赋能 ×3</div>
-        </div>
-        <div class="stat">
-          <h3>观测记录（Observations）</h3>
+        <div class="card">
+          <h3>观测记录</h3>
           <div class="num">14</div>
-          <div class="sub">典型时空截面样例</div>
+          <div class="hint">典型时空截面</div>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- 指标清单（示例） -->
-    <div class="panel">
-      <div class="header" style="margin:0 0 8px 0">
-        <h1 style="font-size:18px;margin:0">指标清单 <span class="pill ok">示例</span></h1>
-      </div>
-      <table class="tbl" aria-label="指标清单">
-        <thead>
-          <tr>
-            <th>名称</th>
-            <th>层级</th>
-            <th>资源类型</th>
-            <th>单位</th>
-            <th>说明</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>年降水总量</td>
-            <td>一级</td>
-            <td>气候</td>
-            <td>mm</td>
-            <td>水分资源数量</td>
-          </tr>
-          <tr>
-            <td>年太阳辐射总量</td>
-            <td>一级</td>
-            <td>气候</td>
-            <td>MJ/m²</td>
-            <td>光能与热量</td>
-          </tr>
-          <tr>
-            <td>森林覆盖率</td>
-            <td>一级</td>
-            <td>地表覆盖</td>
-            <td>%</td>
-            <td>林木资源数量</td>
-          </tr>
-          <tr>
-            <td>水质指数</td>
-            <td>二级</td>
-            <td>水资源</td>
-            <td>无量纲</td>
-            <td>水体质量评价</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <!-- Charts row -->
+      <section class="grid" aria-label="图表">
+        <div class="panel">
+          <h2>资源类型占比</h2>
+          <div id="pie" class="chart" role="img" aria-label="资源类型占比饼图"></div>
+        </div>
+        <div class="panel">
+          <h2>资源质量（示例指标标准化得分）</h2>
+          <div id="bar" class="chart" role="img" aria-label="资源质量横向柱状图"></div>
+        </div>
+      </section>
 
-    <!-- 区域模块（示例） -->
-    <div class="panel">
-      <div class="header" style="margin:0 0 8px 0">
-        <h1 style="font-size:18px;margin:0">区域模块 <span class="pill ok">示例</span></h1>
-      </div>
-      <table class="tbl" aria-label="区域模块">
-        <thead>
-          <tr>
-            <th>名称</th>
-            <th>类型</th>
-            <th>关键特征</th>
-            <th>关联指标</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>长江中下游陆地水面区</td>
-            <td>陆地水面区</td>
-            <td>平原河网密集、湖泊众多、亚热带季风</td>
-            <td>年降水总量 / 地表水储量 / 水质指数</td>
-          </tr>
-          <tr>
-            <td>青藏高原冰川-冻土区</td>
-            <td>冰川-冻土区</td>
-            <td>高寒多年冻土、现代冰川发育、海拔>4000m</td>
-            <td>耕地面积 / 冻土层厚度 / 太阳辐射</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- 日志（仅做视觉占位） -->
-    <div class="panel">
-      <div class="header" style="margin:0 0 8px 0">
-        <h1 style="font-size:18px;margin:0">运行日志 <span class="pill warn">静态展示</span></h1>
-      </div>
-      <div class="log" id="log">开始初始化NRCIM示例数据...
-NRCIM方法示例数据初始化完成！
-已插入数据：
-- 16个详细指标（覆盖4大类资源的三级指标体系）
-- 6个区域模块集（陆地水面区、植被覆盖区、裸地区、冰川-冻土区、过渡区、海岸区）
-- 8个功能模块（4个归类模块 + 1个相互作用模块 + 3个赋能模块）
-- 14条观测数据（涵盖各区域的典型观测记录）
-数据库连接已关闭</div>
-    </div>
+      <!-- Table -->
+      <section class="table" aria-label="观测记录">
+        <table>
+          <thead>
+            <tr>
+              <th>时间</th>
+              <th>区域</th>
+              <th>资源类型</th>
+              <th>指标名称</th>
+              <th>值</th>
+              <th>单位</th>
+              <th>采集方式</th>
+              <th>标签</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2024-01-15 10:00</td>
+              <td>长江中下游陆地水面区</td>
+              <td>气候</td>
+              <td>年降水总量</td>
+              <td>1200</td>
+              <td>mm</td>
+              <td>自动监测</td>
+              <td><span class="badge">典型样例</span></td>
+            </tr>
+            <tr>
+              <td>2024-01-15 10:00</td>
+              <td>长江中下游陆地水面区</td>
+              <td>水</td>
+              <td>地表水储量</td>
+              <td>850.5</td>
+              <td>万m³</td>
+              <td>人工观测</td>
+              <td><span class="badge">Ⅰ类水域</span></td>
+            </tr>
+            <tr>
+              <td>2024-01-16 09:00</td>
+              <td>东北大兴安岭植被覆盖区</td>
+              <td>地表覆盖</td>
+              <td>森林覆盖率</td>
+              <td>82.3</td>
+              <td>%</td>
+              <td>遥感监测</td>
+              <td><span class="badge">高覆盖</span></td>
+            </tr>
+            <tr>
+              <td>2024-01-18 12:00</td>
+              <td>青藏高原冰川-冻土区</td>
+              <td>气候</td>
+              <td>年太阳辐射总量</td>
+              <td>6800</td>
+              <td>MJ/m²</td>
+              <td>自动监测</td>
+              <td><span class="badge">高辐射</span></td>
+            </tr>
+            <tr>
+              <td>2024-01-20 13:00</td>
+              <td>渤海湾海岸区</td>
+              <td>地表覆盖</td>
+              <td>草地生产力</td>
+              <td>2850</td>
+              <td>kg/hm²</td>
+              <td>实地调查</td>
+              <td><span class="badge">沿海带</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
   </div>
+
+  <!-- ECharts -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script>
+    // 饼图：资源类型占比
+    const pie = echarts.init(document.getElementById('pie'));
+    pie.setOption({
+      tooltip: { trigger:'item' },
+      legend: { bottom: 0 },
+      series: [{
+        name: '资源类型', type: 'pie', radius: ['35%','65%'], center:['50%','45%'],
+        label: { formatter: '{b}\n{d}%'},
+        data: [
+          { value: 28, name: '气候' },
+          { value: 26, name: '地表覆盖' },
+          { value: 24, name: '水' },
+          { value: 22, name: '土地' }
+        ]
+      }]
+    });
+
+    // 横向柱状图：资源质量示例（标准化得分）
+    const bar = echarts.init(document.getElementById('bar'));
+    const cats = ['水质指数','森林覆盖率','土壤有机质','降水变异系数'];
+    const vals = [86, 78, 72, 65];
+    bar.setOption({
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      grid: { left: 80, right: 20, top: 20, bottom: 30 },
+      xAxis: { type: 'value', max: 100, axisLabel:{ formatter:'{value}%' } },
+      yAxis: { type: 'category', data: cats },
+      series: [{ type: 'bar', data: vals, barWidth: 18, label: { show: true, position: 'right', formatter: '{c}%' } }]
+    });
+
+    // 响应式
+    window.addEventListener('resize', () => { pie.resize(); bar.resize(); });
+  </script>
 </body>
 </html>
