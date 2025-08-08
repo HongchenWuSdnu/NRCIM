@@ -1,219 +1,652 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>自然资源敏感性分级判别与采集安全指标体系演示面板</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --sidebar:#062b52; --sidebar-2:#071f3a; --primary:#2563eb; --bg:#f6f7fb; --card:#fff; --text:#0f172a; --muted:#6b7280; --line:#e5e7eb;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0; background:var(--bg); color:var(--text); font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-    .layout{display:grid; grid-template-columns:260px 1fr; min-height:100vh}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>自然资源地理信息分类分级与多尺度安全指标体系构建系统</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#f3f6fb; --panel:#ffffff; --line:#e8edf3; --text:#0f172a; --muted:#64748b;
+    --brand:#2563eb; --ok:#16a34a; --warn:#f59e0b; --danger:#ef4444; --radius:14px;
+    --shadow:0 8px 20px rgba(16,24,40,.06);
+    --chip:#f4f7fe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif}
+  .app{display:flex;min-height:100vh}
+  /* 侧栏 */
+  .sider{
+    width:240px;background:linear-gradient(180deg,#0f1b31,#0a1326);
+    color:#dbe7ff;padding:18px 12px 20px;position:sticky;top:0;height:100vh
+  }
+  .brand{height:44px;border-radius:10px;background:#0b1630;margin-bottom:16px}
+  .menu{margin-top:8px}
+  .menu h4{margin:14px 12px 8px;color:#9fb3e6;font-size:12px}
+  .item{display:flex;align-items:center;gap:10px;color:#dbe7ff;
+        padding:10px 12px;border-radius:10px;text-decoration:none;cursor:pointer}
+  .item:hover{background:rgba(255,255,255,.06)}
+  .item.active{background:#1a2a52}
+  .ico{width:8px;height:8px;border-radius:50%;background:#67a1ff}
 
-    /* Sidebar */
-    .side{background:linear-gradient(180deg,var(--sidebar),var(--sidebar-2)); color:#e6efff; position:sticky; top:0; height:100vh;}
-    .brand{display:flex; align-items:center; gap:10px; padding:18px 16px; border-bottom:1px solid rgba(255,255,255,.08)}
-    .logo{width:34px;height:34px;border-radius:10px;background:radial-gradient(circle at 30% 30%,#60a5fa,transparent 40%), radial-gradient(circle at 70% 70%,#22d3ee,transparent 40%), #1d4ed8; box-shadow:0 8px 26px rgba(37,99,235,.35)}
-    .brand h1{font-size:15px; font-weight:800; margin:0}
-    .nav{padding:10px}
-    .nav a{display:flex; align-items:center; gap:8px; padding:10px 12px; color:#dbeafe; border-radius:10px; text-decoration:none; font-size:14px; border:1px solid transparent}
-    .nav a:hover{background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.08)}
-    .nav a.active{background:#0b3a78; border-color:#0b3a78}
+  /* 主区 */
+  .main{flex:1; padding:22px 28px 40px; overflow:auto}
+  .title{
+    background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);
+    border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;
+    text-align:center;font-weight:800;font-size:18px
+  }
 
-    /* Main */
-    .main{padding:22px 26px}
-    .title{font-size:18px; font-weight:800; margin-bottom:14px}
+  /* 通用容器/卡片/按钮/徽章/表格 */
+  .block{background:var(--panel);border:1px solid var(--line);
+         border-radius:var(--radius);box-shadow:var(--shadow)}
+  .hd{padding:14px 16px;border-bottom:1px solid var(--line);font-weight:700;
+      display:flex;align-items:center;justify-content:space-between}
+  .bd{padding:16px}
+  .btn{border:1px solid transparent;background:var(--brand);color:#fff;border-radius:10px;
+       padding:8px 12px;font-size:14px;cursor:pointer}
+  .btn.secondary{background:#fff;color:#1f2937;border-color:#cfd8e3}
+  .btn.ghost{background:#fff;border-color:#cfd8e3;color:#1f2937}
+  .btn.danger{background:#fff;border-color:#fecaca;color:#ef4444}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  .badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;border:1px solid #e5e7eb;background:var(--chip);color:#334155}
+  .badge.blue{border-color:#bfdbfe;background:#eff6ff;color:#1d4ed8}
+  .badge.green{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+  .badge.orange{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
+  .badge.gray{color:#475569}
+  table{width:100%;border-collapse:separate;border-spacing:0 10px}
+  thead th{padding:10px 12px;color:#6b7280;font-size:12px;text-align:left}
+  tbody td{background:#fff;border:1px solid var(--line);border-left:none;border-right:none;padding:12px;vertical-align:top}
+  tbody tr{box-shadow:var(--shadow)}
+  tbody td:first-child{border-left:1px solid var(--line);border-top-left-radius:12px;border-bottom-left-radius:12px}
+  tbody td:last-child{border-right:1px solid var(--line);border-top-right-radius:12px;border-bottom-right-radius:12px}
+  .muted{color:#6b7280}
+  .toolbar{display:flex;gap:10px;align-items:center}
+  .right{margin-left:auto}
+  .actions{display:flex;gap:10px;align-items:center}
+  .link{color:#2563eb;cursor:pointer}
+  .link.danger{color:#ef4444}
 
-    .cards{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:16px}
-    .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 6px 20px rgba(0,0,0,.04)}
-    .card h3{margin:0 0 4px; font-size:13px; color:var(--muted); font-weight:600}
-    .card .num{font-weight:800; font-size:26px}
-    .card .hint{font-size:12px; color:var(--muted)}
+  /* 分页 */
+  .pager{display:flex;align-items:center;gap:10px;margin-top:12px;color:#475569}
+  .pager .page{padding:6px 10px;border:1px solid #cfd8e3;border-radius:8px;background:#fff;cursor:pointer}
+  .pager .page.active{border-color:#2563eb;color:#2563eb}
+  .select{padding:6px 8px;border:1px solid #cfd8e3;border-radius:8px;background:#fff}
 
-    .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px}
-    .panel{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 6px 20px rgba(0,0,0,.04)}
-    .panel h2{margin:0 0 10px; font-size:14px}
-    .chart{width:100%; height:300px}
+  /* KPI & Charts（仪表盘） */
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+        padding:14px 16px;box-shadow:var(--shadow)}
+  .k-top{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin-bottom:6px}
+  .k-val{font-size:22px;font-weight:800;display:flex;align-items:center;gap:8px}
+  .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;margin-top:16px}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .tag{display:flex;align-items:center;gap:6px;font-size:12px;color:#334155}
+  .dot{width:10px;height:10px;border-radius:50%}
+  .bar{display:flex;align-items:center;gap:12px;margin:14px 0}
+  .bar .name{width:96px;color:#475569;font-size:12px}
+  .track{flex:1;height:10px;background:#eef2ff;border-radius:999px;overflow:hidden}
+  .fill{height:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa)}
+  .pct{width:48px;text-align:right;color:#475569;font-size:12px}
 
-    .table{background:var(--card); border:1px solid var(--line); border-radius:16px; overflow:hidden}
-    table{width:100%; border-collapse:separate; border-spacing:0}
-    thead th{font-size:12px; text-align:left; color:#64748b; padding:10px 12px; background:#f8fafc; border-bottom:1px solid var(--line)}
-    tbody td{padding:12px; border-bottom:1px solid var(--line); font-size:14px}
-    tbody tr:hover{background:#f9fbff}
-    .badge{display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; background:#eff6ff; color:#1d4ed8; border:1px solid #dbeafe}
+  /* 弹窗&提示 */
+  .mask{position:fixed;inset:0;background:rgba(15,23,42,.38);display:none;align-items:center;justify-content:center;z-index:50}
+  .dialog{width:560px;max-width:92vw;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+  .dialog .hd{border-bottom:1px solid var(--line)}
+  .form{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center}
+  .form label{color:#475569}
+  .form input,.form select,.form textarea{width:100%;padding:8px 10px;border:1px solid #cfd8e3;border-radius:8px;background:#fff}
+  .form textarea{min-height:84px;resize:vertical}
+  .toast{position:fixed;right:16px;bottom:16px;background:#111827;color:#fff;padding:10px 12px;border-radius:8px;opacity:0;transform:translateY(8px);transition:all .25s;z-index:60}
+  .toast.show{opacity:1;transform:translateY(0)}
 
-    @media (max-width:1100px){ .layout{grid-template-columns:72px 1fr} .brand h1{display:none} .nav a span{display:none} }
-    @media (max-width:920px){ .cards{grid-template-columns:repeat(2,1fr)} .grid{grid-template-columns:1fr} }
-    @media (max-width:560px){ .cards{grid-template-columns:1fr} .main{padding:16px} }
-  </style>
+  /* 响应式 */
+  @media (max-width:1200px){ .cards{grid-template-columns:repeat(2,1fr)} .grid{grid-template-columns:1fr} .sider{width:220px} }
+  @media (max-width:860px){ .sider{display:none} .cards{grid-template-columns:1fr} .form{grid-template-columns:1fr} }
+</style>
 </head>
 <body>
-  <div class="layout">
-    <aside class="side">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <h1>NRCIM 控制台</h1>
+<div class="app">
+
+  <!-- 侧边栏 -->
+  <aside class="sider">
+    <div class="brand"></div>
+    <nav class="menu">
+      <h4>导航</h4>
+      <div class="item active" data-route="dashboard"><span class="ico"></span> 仪表盘</div>
+      <div class="item" data-route="types"><span class="ico"></span> 资源类型管理</div>
+      <div class="item" data-route="indicators"><span class="ico"></span> 指标体系管理</div>
+      <div class="item" data-route="modules"><span class="ico"></span> 模块管理</div>
+      <div class="item" data-route="regions"><span class="ico"></span> 区域管理</div>
+      <div class="item" data-route="observations"><span class="ico"></span> 观测数据</div>
+    </nav>
+  </aside>
+
+  <!-- 主体 -->
+  <main class="main">
+    <div class="title">自然资源地理信息分类分级与多尺度安全指标体系构建系统</div>
+
+    <!-- 仪表盘 -->
+    <section id="view-dashboard" class="view">
+      <section class="cards">
+        <div class="card">
+          <div class="k-top">系统概览</div>
+          <div class="k-val">👁️ 14</div>
+          <div class="muted" style="font-size:12px">总观测站点</div>
+        </div>
+        <div class="card">
+          <div class="k-top">系统概览</div>
+          <div class="k-val">📏 16</div>
+          <div class="muted" style="font-size:12px">指标体系</div>
+        </div>
+        <div class="card">
+          <div class="k-top">系统概览</div>
+          <div class="k-val">🗺️ 6</div>
+          <div class="muted" style="font-size:12px">区域数量</div>
+        </div>
+        <div class="card">
+          <div class="k-top">系统概览</div>
+          <div class="k-val">🗂️ 4</div>
+          <div class="muted" style="font-size:12px">资源类型</div>
+        </div>
+      </section>
+
+      <div class="grid">
+        <section class="block">
+          <div class="hd">资源类型分布</div>
+          <div class="bd">
+            <div class="legend">
+              <span class="tag"><span class="dot" style="background:#60a5fa"></span> 气候资源</span>
+              <span class="tag"><span class="dot" style="background:#22c55e"></span> 地表要素</span>
+              <span class="tag"><span class="dot" style="background:#f59e0b"></span> 水资源</span>
+              <span class="tag"><span class="dot" style="background:#ef4444"></span> 土地资源</span>
+            </div>
+            <canvas id="pie" height="180"></canvas>
+          </div>
+        </section>
+
+        <section class="block">
+          <div class="hd">系统状态</div>
+          <div class="bd">
+            <div class="bar"><div class="name">数据完整性</div><div class="track"><div class="fill" style="width:85%"></div></div><div class="pct">85%</div></div>
+            <div class="bar"><div class="name">系统性能</div>  <div class="track"><div class="fill" style="width:92%"></div></div><div class="pct">92%</div></div>
+            <div class="bar"><div class="name">数据准确性</div><div class="track"><div class="fill" style="width:78%"></div></div><div class="pct">78%</div></div>
+          </div>
+        </section>
       </div>
-      <nav class="nav">
-        <a href="#" class="active">📊 <span>仪表盘</span></a>
-        <a href="#">🧭 <span>区域模块</span></a>
-        <a href="#">🧩 <span>功能模块</span></a>
-        <a href="#">📚 <span>指标字典</span></a>
-        <a href="#">⚙️ <span>系统设置</span></a>
-      </nav>
-    </aside>
+    </section>
 
-    <main class="main">
-      <div class="title">自然资源敏感性分级判别与采集安全指标体系演示系统</div>
-
-      <!-- Top stats cards -->
-      <section class="cards" aria-label="统计概览">
-        <div class="card">
-          <h3>资源类型</h3>
-          <div class="num">4</div>
-          <div class="hint">气候 / 地表覆盖 / 水 / 土地</div>
+    <!-- 资源类型管理 -->
+    <section id="view-types" class="view" style="display:none">
+      <section class="block">
+        <div class="hd">
+          <div>资源类型管理</div>
+          <div class="toolbar">
+            <button class="btn" data-open="type">＋ 添加资源类型</button>
+          </div>
         </div>
-        <div class="card">
-          <h3>指标总数</h3>
-          <div class="num">16</div>
-          <div class="hint">三级指标体系</div>
-        </div>
-        <div class="card">
-          <h3>区域数</h3>
-          <div class="num">6</div>
-          <div class="hint">陆地水面区 · 植被覆盖区 · 裸地区 · 冰川-冻土区 · 过渡区 · 海岸区</div>
-        </div>
-        <div class="card">
-          <h3>观测记录</h3>
-          <div class="num">14</div>
-          <div class="hint">典型时空截面</div>
+        <div class="bd">
+          <table id="types-table"></table>
+          <div class="pager" id="types-pager"></div>
         </div>
       </section>
+    </section>
 
-      <!-- Charts row -->
-      <section class="grid" aria-label="图表">
-        <div class="panel">
-          <h2>资源类型占比</h2>
-          <div id="pie" class="chart" role="img" aria-label="资源类型占比饼图"></div>
+    <!-- 指标体系管理 -->
+    <section id="view-indicators" class="view" style="display:none">
+      <section class="block">
+        <div class="hd">
+          <div>指标体系管理</div>
+          <div class="toolbar"><button class="btn" data-open="indicator">＋ 添加指标</button></div>
         </div>
-        <div class="panel">
-          <h2>资源质量（示例指标标准化得分）</h2>
-          <div id="bar" class="chart" role="img" aria-label="资源质量横向柱状图"></div>
+        <div class="bd">
+          <table id="indicators-table"></table>
+          <div class="pager" id="indicators-pager"></div>
         </div>
       </section>
+    </section>
 
-      <!-- Table -->
-      <section class="table" aria-label="观测记录">
-        <table>
-          <thead>
-            <tr>
-              <th>时间</th>
-              <th>区域</th>
-              <th>资源类型</th>
-              <th>指标名称</th>
-              <th>值</th>
-              <th>单位</th>
-              <th>采集方式</th>
-              <th>标签</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>2024-01-15 10:00</td>
-              <td>长江中下游陆地水面区</td>
-              <td>气候</td>
-              <td>年降水总量</td>
-              <td>1200</td>
-              <td>mm</td>
-              <td>自动监测</td>
-              <td><span class="badge">典型样例</span></td>
-            </tr>
-            <tr>
-              <td>2024-01-15 10:00</td>
-              <td>长江中下游陆地水面区</td>
-              <td>水</td>
-              <td>地表水储量</td>
-              <td>850.5</td>
-              <td>万m³</td>
-              <td>人工观测</td>
-              <td><span class="badge">Ⅰ类水域</span></td>
-            </tr>
-            <tr>
-              <td>2024-01-16 09:00</td>
-              <td>东北大兴安岭植被覆盖区</td>
-              <td>地表覆盖</td>
-              <td>森林覆盖率</td>
-              <td>82.3</td>
-              <td>%</td>
-              <td>遥感监测</td>
-              <td><span class="badge">高覆盖</span></td>
-            </tr>
-            <tr>
-              <td>2024-01-18 12:00</td>
-              <td>青藏高原冰川-冻土区</td>
-              <td>气候</td>
-              <td>年太阳辐射总量</td>
-              <td>6800</td>
-              <td>MJ/m²</td>
-              <td>自动监测</td>
-              <td><span class="badge">高辐射</span></td>
-            </tr>
-            <tr>
-              <td>2024-01-20 13:00</td>
-              <td>渤海湾海岸区</td>
-              <td>地表覆盖</td>
-              <td>草地生产力</td>
-              <td>2850</td>
-              <td>kg/hm²</td>
-              <td>实地调查</td>
-              <td><span class="badge">沿海带</span></td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- 模块管理 -->
+    <section id="view-modules" class="view" style="display:none">
+      <section class="block">
+        <div class="hd">
+          <div>模块管理</div>
+          <div class="toolbar"><button class="btn" data-open="module">＋ 添加模块</button></div>
+        </div>
+        <div class="bd">
+          <table id="modules-table"></table>
+          <div class="pager" id="modules-pager"></div>
+        </div>
       </section>
-    </main>
+    </section>
+
+    <!-- 区域管理 -->
+    <section id="view-regions" class="view" style="display:none">
+      <section class="block">
+        <div class="hd">
+          <div>区域管理</div>
+          <div class="toolbar"><button class="btn" data-open="region">＋ 添加区域</button></div>
+        </div>
+        <div class="bd">
+          <table id="regions-table"></table>
+          <div class="pager" id="regions-pager"></div>
+        </div>
+      </section>
+    </section>
+
+    <!-- 观测数据 -->
+    <section id="view-observations" class="view" style="display:none">
+      <section class="block">
+        <div class="hd">
+          <div>观测数据管理</div>
+          <div class="toolbar"><button class="btn" data-open="ob">＋ 添加观测数据</button></div>
+        </div>
+        <div class="bd">
+          <table id="obs-table"></table>
+          <div class="pager" id="obs-pager"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<!-- 通用弹窗 -->
+<div class="mask" id="mask">
+  <div class="dialog">
+    <div class="hd"><div id="dlg-title">新建</div></div>
+    <div class="bd">
+      <form id="dlg-form" class="form"></form>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+        <button class="btn ghost" type="button" id="dlg-cancel">取消</button>
+        <button class="btn" type="submit" id="dlg-ok">保存</button>
+      </div>
+    </div>
   </div>
+</div>
+<div class="toast" id="toast">已保存</div>
 
-  <!-- ECharts -->
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-  <script>
-    // 饼图：资源类型占比
-    const pie = echarts.init(document.getElementById('pie'));
-    pie.setOption({
-      tooltip: { trigger:'item' },
-      legend: { bottom: 0 },
-      series: [{
-        name: '资源类型', type: 'pie', radius: ['35%','65%'], center:['50%','45%'],
-        label: { formatter: '{b}\n{d}%'},
-        data: [
-          { value: 28, name: '气候' },
-          { value: 26, name: '地表覆盖' },
-          { value: 24, name: '水' },
-          { value: 22, name: '土地' }
-        ]
-      }]
-    });
+<script>
+/* ========= 1) 仪表盘图表 ========= */
+const pieInit = () => new Chart(document.getElementById('pie'),{
+  type:'pie',
+  data:{labels:['气候资源','地表要素','水资源','土地资源'],
+    datasets:[{data:[25,25,25,25],borderWidth:0,backgroundColor:['#60a5fa','#22c55e','#f59e0b','#ef4444']}]},
+  options:{plugins:{legend:{display:false}},layout:{padding:8}}
+});
 
-    // 横向柱状图：资源质量示例（标准化得分）
-    const bar = echarts.init(document.getElementById('bar'));
-    const cats = ['水质指数','森林覆盖率','土壤有机质','降水变异系数'];
-    const vals = [86, 78, 72, 65];
-    bar.setOption({
-      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-      grid: { left: 80, right: 20, top: 20, bottom: 30 },
-      xAxis: { type: 'value', max: 100, axisLabel:{ formatter:'{value}%' } },
-      yAxis: { type: 'category', data: cats },
-      series: [{ type: 'bar', data: vals, barWidth: 18, label: { show: true, position: 'right', formatter: '{c}%' } }]
-    });
+/* ========= 2) 伪路由（单页切换） ========= */
+const routes = ['dashboard','types','indicators','modules','regions','observations'];
+const showView = (name) => {
+  document.querySelectorAll('.view').forEach(v=>v.style.display='none');
+  document.getElementById('view-'+name).style.display='';
+  document.querySelectorAll('.item').forEach(i=>i.classList.toggle('active', i.dataset.route===name));
+  if(name==='dashboard' && !window._pieInited){ pieInit(); window._pieInited=true; }
+  location.hash = name;
+};
+document.querySelectorAll('.item').forEach(i=>i.onclick=()=>showView(i.dataset.route));
+window.addEventListener('load', ()=>{
+  const r = routes.includes(location.hash.slice(1))? location.hash.slice(1): 'dashboard';
+  showView(r);
+});
 
-    // 响应式
-    window.addEventListener('resize', () => { pie.resize(); bar.resize(); });
-  </script>
+/* ========= 3) 简易状态存储（内存） ========= */
+const dataStore = {
+  types: [
+    {id:1,name:'土地资源',cat:'land',desc:'农用地（林地、草地、耕地、耕地）',time:'2025/8/6 10:04:18'},
+    {id:2,name:'地表覆盖',cat:'surface',desc:'林木、草、作物',time:'2025/8/6 10:04:18'},
+    {id:3,name:'气候资源',cat:'climate',desc:'水分、光能热量、风能和大气…',time:'2025/8/6 10:04:18'},
+    {id:4,name:'水资源',cat:'water',desc:'地表水、冰川、海面和地下水',time:'2025/8/6 10:04:18'},
+  ],
+  indicators: [
+    {id:1,name:'地表水储量',lvl:'1级指标',rtype:'水资源',pol:'正向',unit:'万m³',desc:'地表水资源数量',time:'2025/8/8 03:14:56'},
+    {id:2,name:'年太阳辐射总量',lvl:'1级指标',rtype:'气候资源',pol:'正向',unit:'MJ/m²',desc:'反映光能热量',time:'2025/8/8 03:14:56'},
+    {id:3,name:'年降水总量',lvl:'1级指标',rtype:'气候资源',pol:'正向',unit:'mm',desc:'反映气候资源',time:'2025/8/8 03:14:56'},
+    {id:4,name:'年风能密度',lvl:'1级指标',rtype:'气候资源',pol:'正向',unit:'W/m²',desc:'反映风能密度',time:'2025/8/8 03:14:56'},
+    {id:5,name:'森林覆盖率',lvl:'1级指标',rtype:'地表覆盖',pol:'反向',unit:'%',desc:'林木资源数量',time:'2025/8/8 03:14:56'},
+    {id:6,name:'耕地面积',lvl:'1级指标',rtype:'土地资源',pol:'正向',unit:'hm²',desc:'农用地数量',time:'2025/8/8 03:14:56'},
+    {id:7,name:'土壤有机质含量',lvl:'2级指标',rtype:'土地资源',pol:'正向',unit:'g/kg',desc:'土壤资源质量',time:'2025/8/8 03:14:56'},
+    {id:8,name:'大气CO2浓度',lvl:'2级指标',rtype:'气候资源',pol:'正向',unit:'ppm',desc:'反映大气成分',time:'2025/8/8 03:14:56'},
+    {id:9,name:'水质指数',lvl:'2级指标',rtype:'水资源',pol:'正向',unit:'无量纲',desc:'水资源质量评价',time:'2025/8/8 03:14:56'},
+  ],
+  modules: [
+    {id:1,name:'土地资源质量模块',desc:'包含农用地和林草利用…',inc:['耕地面积','土壤有机质','+1'],areas:['陆地冰冻区','绿洲区'] ,time:'2025/8/8 03:14:56'},
+    {id:2,name:'地表覆盖资源模块',desc:'涵盖林木、草、作物…',inc:['森林覆盖率','草地生产力','+1'],areas:['陆地冰冻区','绿洲区','+4'],time:'2025/8/8 03:14:56'},
+    {id:3,name:'气候资源数量质量模块',desc:'整合气候资源的数量和…',inc:['年降水总量','年太阳辐射','+3'],areas:['陆地冰冻区','绿洲区'],time:'2025/8/8 03:14:56'},
+    {id:4,name:'水资源综合模块',desc:'整合地表水、冰川、海…',inc:['地表水储量','水质指数','+1'],areas:['水川·冻土区','+2'],time:'2025/8/8 03:14:56'},
+  ],
+  regions: [
+    {id:1,name:'东北大兴安岭植被覆盖区',rtype:'植被覆盖',feat:['指数组型: 温带针叶林','气候条件: 温带大陆性气候','+2'],sets:['森林覆盖率','草地生产力','+1'],time:'2025/8/8 03:14:56'},
+    {id:2,name:'内蒙古高原裸地区',rtype:'裸地区',feat:['地貌类型: 高原丘陵','植被稀少: 草丛形式斑块','+2'],sets:['年降水总量','降水变异系数','+1'],time:'2025/8/8 03:14:56'},
+    {id:3,name:'渤海湾海岸区',rtype:'海岸区',feat:['海岸类型: 淤泥质海湾','潮汐特征: 正规单日潮','+2'],sets:['冰川面积','草地生产力','+1'],time:'2025/8/8 03:14:56'},
+  ],
+  observations: [
+    {id:1,t:'2024/1/20 13:00:00',area:'渤海湾海岸区',rtype:'气候资源',ind:'年降水总量',val:'580 mm',src:'自动监测',time:'2025/8/8 03:14:56'},
+    {id:2,t:'2024/1/20 13:00:00',area:'渤海湾海岸区',rtype:'地表覆盖',ind:'草地生产力',val:'2850 kg/hm²',src:'实地调查',time:'2025/8/8 03:14:56'},
+    {id:3,t:'2024/1/19 15:00:00',area:'黄河三角洲过渡区',rtype:'地表覆盖',ind:'森林覆盖率',val:'35.8 %',src:'遥感监测',time:'2025/8/8 03:14:56'},
+    {id:4,t:'2024/1/18 12:00:00',area:'青藏高原冰川·冻土区',rtype:'气候资源',ind:'年太阳辐射总量',val:'6800 MJ/m²',src:'自动监测',time:'2025/8/8 03:14:56'},
+    {id:5,t:'2024/1/18 08:00:00',area:'青藏高原冰川·冻土区',rtype:'水资源',ind:'冰川面积',val:'156.7 km²',src:'遥感监测',time:'2025/8/8 03:14:56'},
+    {id:6,t:'2024/1/17 11:00:00',area:'内蒙古高原裸地区',rtype:'气候资源',ind:'年降水总量',val:'320 mm',src:'自动监测',time:'2025/8/8 03:14:56'},
+    {id:7,t:'2024/1/17 11:00:00',area:'内蒙古高原裸地区',rtype:'土地资源',ind:'耕地面积',val:'1250.8 hm²',src:'遥感监测',time:'2025/8/8 03:14:56'},
+    {id:8,t:'2024/1/16 09:00:00',area:'东北大兴安岭植被覆盖区',rtype:'地表覆盖',ind:'草地生产力',val:'4250 kg/hm²',src:'实地调查',time:'2025/8/8 03:14:56'},
+  ]
+};
+
+/* ========= 4) 渲染器 & 分页 ========= */
+function paginate(arr, page=1, size=10){
+  const total = arr.length, pages = Math.max(1, Math.ceil(total/size));
+  const start = (page-1)*size, end = start + size;
+  return {slice: arr.slice(start,end), total, pages, page, size};
+}
+function pager(el, state, onGoto){
+  el.innerHTML = '';
+  const left = document.createElement('div'); left.textContent = `共 ${state.total} 条记录`;
+  const box = document.createElement('div'); box.style.marginLeft='auto'; box.style.display='flex'; box.style.alignItems='center'; box.style.gap='10px';
+  const prev = document.createElement('div'); prev.className='page'; prev.textContent='<'; prev.onclick=()=> onGoto(Math.max(1,state.page-1));
+  const cur = document.createElement('div'); cur.className='page active'; cur.textContent=state.page;
+  const next = document.createElement('div'); next.className='page'; next.textContent='>'; next.onclick=()=> onGoto(Math.min(state.pages,state.page+1));
+  const sel = document.createElement('select'); sel.className='select';
+  [10,20,50].forEach(n=>{ const o=document.createElement('option'); o.value=n;o.textContent=`${n} / page`; if(n===state.size) o.selected=true; sel.appendChild(o);});
+  sel.onchange=()=> onGoto(1, Number(sel.value));
+  el.append(left, prev, cur, next, sel);
+}
+
+/* ===== 资源类型表 ===== */
+let typesPage=1, typesSize=10;
+function renderTypes(){
+  const table = document.getElementById('types-table');
+  const p = paginate(dataStore.types, typesPage, typesSize);
+  table.innerHTML = `
+    <thead><tr>
+      <th style="width:18%">名称</th><th style="width:14%">分类</th><th>描述</th>
+      <th style="width:18%">创建时间</th><th style="width:12%">操作</th></tr></thead>
+    <tbody>
+      ${p.slice.map(r=>`
+        <tr>
+          <td>${r.name}</td><td class="muted">${r.cat}</td><td>${r.desc}</td>
+          <td class="muted">${r.time}</td>
+          <td>
+            <div class="actions">
+              <span class="link" onclick="openDialog('type', ${r.id})">✏️ 编辑</span>
+              <span class="link danger" onclick="removeType(${r.id})">🗑 删除</span>
+            </div>
+          </td>
+        </tr>`).join('')}
+    </tbody>`;
+  pager(document.getElementById('types-pager'), p, (pg, sz)=>{ typesPage=pg; if(sz) typesSize=sz; renderTypes(); });
+}
+function removeType(id){
+  if(!confirm('确认删除该资源类型？')) return;
+  dataStore.types = dataStore.types.filter(x=>x.id!==id);
+  toast('已删除'); renderTypes();
+}
+
+/* ===== 指标表 ===== */
+let indPage=1, indSize=10;
+function renderIndicators(){
+  const table = document.getElementById('indicators-table');
+  const p = paginate(dataStore.indicators, indPage, indSize);
+  table.innerHTML = `
+    <thead><tr>
+      <th style="width:20%">指标名称</th><th style="width:12%">级别</th><th style="width:12%">资源类型</th>
+      <th style="width:10%">来源类型</th><th style="width:8%">单位</th><th>描述</th>
+      <th style="width:16%">创建时间</th><th style="width:12%">操作</th></tr></thead>
+    <tbody>
+      ${p.slice.map(r=>`
+        <tr>
+          <td>${r.name}</td>
+          <td><span class="badge blue">${r.lvl}</span></td>
+          <td class="muted">${r.rtype}</td>
+          <td><span class="badge ${r.pol==='反向'?'orange':'green'}">${r.pol}</span></td>
+          <td>${r.unit}</td>
+          <td>${r.desc}</td>
+          <td class="muted">${r.time}</td>
+          <td>
+            <div class="actions">
+              <span class="link" onclick="openDialog('indicator', ${r.id})">✏️ 编辑</span>
+              <span class="link danger" onclick="removeIndicator(${r.id})">🗑 删除</span>
+            </div>
+          </td>
+        </tr>`).join('')}
+    </tbody>`;
+  pager(document.getElementById('indicators-pager'), p, (pg, sz)=>{ indPage=pg; if(sz) indSize=sz; renderIndicators(); });
+}
+function removeIndicator(id){
+  if(!confirm('确认删除该指标？')) return;
+  dataStore.indicators = dataStore.indicators.filter(x=>x.id!==id);
+  toast('已删除'); renderIndicators();
+}
+
+/* ===== 模块表 ===== */
+let modPage=1, modSize=10;
+function pills(arr){ return arr.map(t=>`<span class="badge gray">${t}</span>`).join(' '); }
+function renderModules(){
+  const table = document.getElementById('modules-table');
+  const p = paginate(dataStore.modules, modPage, modSize);
+  table.innerHTML = `
+    <thead><tr>
+      <th style="width:22%">模块名称</th><th>描述</th><th style="width:22%">包含指标</th>
+      <th style="width:20%">适用区域</th><th style="width:16%">创建时间</th><th style="width:12%">操作</th></tr></thead>
+    <tbody>
+      ${p.slice.map(r=>`
+        <tr>
+          <td>${r.name}</td><td>${r.desc}</td>
+          <td>${pills(r.inc)}</td><td>${pills(r.areas)}</td>
+          <td class="muted">${r.time}</td>
+          <td>
+            <div class="actions">
+              <span class="link" onclick="openDialog('module', ${r.id})">✏️ 编辑</span>
+              <span class="link danger" onclick="removeModule(${r.id})">🗑 删除</span>
+            </div>
+          </td>
+        </tr>`).join('')}
+    </tbody>`;
+  pager(document.getElementById('modules-pager'), p, (pg, sz)=>{ modPage=pg; if(sz) modSize=sz; renderModules(); });
+}
+function removeModule(id){
+  if(!confirm('确认删除该模块？')) return;
+  dataStore.modules = dataStore.modules.filter(x=>x.id!==id);
+  toast('已删除'); renderModules();
+}
+
+/* ===== 区域表 ===== */
+let regPage=1, regSize=10;
+function renderRegions(){
+  const table = document.getElementById('regions-table');
+  const p = paginate(dataStore.regions, regPage, regSize);
+  table.innerHTML = `
+    <thead><tr>
+      <th style="width:24%">区域名称</th><th style="width:12%">区域类型</th><th>特征参数</th>
+      <th style="width:20%">指标集</th><th style="width:16%">创建时间</th><th style="width:12%">操作</th></tr></thead>
+    <tbody>
+      ${p.slice.map(r=>`
+        <tr>
+          <td>${r.name}</td>
+          <td><span class="badge blue">${r.rtype}</span></td>
+          <td>${pills(r.feat)}</td>
+          <td>${pills(r.sets)}</td>
+          <td class="muted">${r.time}</td>
+          <td>
+            <div class="actions">
+              <span class="link" onclick="openDialog('region', ${r.id})">✏️ 编辑</span>
+              <span class="link danger" onclick="removeRegion(${r.id})">🗑 删除</span>
+            </div>
+          </td>
+        </tr>`).join('')}
+    </tbody>`;
+  pager(document.getElementById('regions-pager'), p, (pg, sz)=>{ regPage=pg; if(sz) regSize=sz; renderRegions(); });
+}
+function removeRegion(id){
+  if(!confirm('确认删除该区域？')) return;
+  dataStore.regions = dataStore.regions.filter(x=>x.id!==id);
+  toast('已删除'); renderRegions();
+}
+
+/* ===== 观测数据表 ===== */
+let obsPage=1, obsSize=10;
+function renderObs(){
+  const table = document.getElementById('obs-table');
+  const p = paginate(dataStore.observations, obsPage, obsSize);
+  table.innerHTML = `
+    <thead><tr>
+      <th style="width:16%">观测时间</th><th style="width:18%">区域</th><th style="width:10%">资源类型</th>
+      <th style="width:16%">指标</th><th style="width:12%">数值</th><th style="width:12%">采集方式</th>
+      <th style="width:16%">创建时间</th><th style="width:10%">操作</th></tr></thead>
+    <tbody>
+      ${p.slice.map(r=>`
+        <tr>
+          <td>${r.t}</td><td class="muted">${r.area}</td><td>${r.rtype}</td>
+          <td>${r.ind}</td><td>${r.val}</td><td>${r.src}</td>
+          <td class="muted">${r.time}</td>
+          <td>
+            <div class="actions">
+              <span class="link" onclick="openDialog('ob', ${r.id})">✏️ 编辑</span>
+              <span class="link danger" onclick="removeOb(${r.id})">🗑 删除</span>
+            </div>
+          </td>
+        </tr>`).join('')}
+    </tbody>`;
+  pager(document.getElementById('obs-pager'), p, (pg, sz)=>{ obsPage=pg; if(sz) obsSize=sz; renderObs(); });
+}
+function removeOb(id){
+  if(!confirm('确认删除该观测记录？')) return;
+  dataStore.observations = dataStore.observations.filter(x=>x.id!==id);
+  toast('已删除'); renderObs();
+}
+
+/* ========= 5) 弹窗逻辑（增改） ========= */
+const mask = document.getElementById('mask');
+const dlgForm = document.getElementById('dlg-form');
+const dlgTitle = document.getElementById('dlg-title');
+document.querySelectorAll('[data-open="type"]').forEach(b=>b.onclick=()=>openDialog('type'));
+document.querySelectorAll('[data-open="indicator"]').forEach(b=>b.onclick=()=>openDialog('indicator'));
+document.querySelectorAll('[data-open="module"]').forEach(b=>b.onclick=()=>openDialog('module'));
+document.querySelectorAll('[data-open="region"]').forEach(b=>b.onclick=()=>openDialog('region'));
+document.querySelectorAll('[data-open="ob"]').forEach(b=>b.onclick=()=>openDialog('ob'));
+document.getElementById('dlg-cancel').onclick=()=>closeDialog();
+
+let dlgCtx={kind:'', id:null};
+function openDialog(kind, id=null){
+  dlgCtx={kind,id};
+  mask.style.display='flex';
+  const isEdit = !!id;
+  const titleMap = {type:'资源类型', indicator:'指标', module:'模块', region:'区域', ob:'观测数据'};
+  dlgTitle.textContent = (isEdit?'编辑 ':'新增 ')+ titleMap[kind];
+
+  // 根据类型渲染表单
+  const f = (n,l,t='text',ph='',val='')=>`
+    <label for="${n}">${l}</label>
+    ${t==='textarea'
+      ? `<textarea id="${n}" placeholder="${ph}">${val||''}</textarea>`
+      : t==='select'
+        ? `<select id="${n}">${ph}</select>`
+        : `<input id="${n}" type="${t}" placeholder="${ph}" value="${val||''}"/>`}`;
+
+  if(kind==='type'){
+    const row = isEdit ? dataStore.types.find(x=>x.id===id) : {};
+    dlgForm.innerHTML = f('name','名称*','text','如：土地资源',row.name)
+      + f('cat','分类*','text','land/surface/climate/water',row.cat)
+      + f('desc','描述','textarea','概述',row.desc);
+  }
+  if(kind==='indicator'){
+    const row = isEdit ? dataStore.indicators.find(x=>x.id===id) : {};
+    const lvlOpts = ['1级指标','2级指标','3级指标'].map(v=>`<option ${row.lvl===v?'selected':''}>${v}</option>`).join('');
+    const rtypeOpts = ['水资源','气候资源','地表覆盖','土地资源'].map(v=>`<option ${row.rtype===v?'selected':''}>${v}</option>`).join('');
+    const polOpts = ['正向','反向'].map(v=>`<option ${row.pol===v?'selected':''}>${v}</option>`).join('');
+    dlgForm.innerHTML =
+      f('name','指标名称*','text','如：年降水总量',row.name)+
+      f('lvl','级别*','select',lvlOpts)+
+      f('rtype','资源类型*','select',rtypeOpts)+
+      f('pol','来源类型*','select',polOpts)+
+      f('unit','单位*','text','mm / % / MJ/m²…',row.unit)+
+      f('desc','描述','textarea','用途或解释',row.desc);
+  }
+  if(kind==='module'){
+    const row = isEdit ? dataStore.modules.find(x=>x.id===id) : {};
+    dlgForm.innerHTML =
+      f('name','模块名称*','text','如：气候资源数量质量模块',row.name)+
+      f('desc','描述','textarea','模块说明',row.desc)+
+      f('inc','包含指标(逗号分隔)','text','森林覆盖率, 草地生产力, +1', row.inc?row.inc.join(', '):'')+
+      f('areas','适用区域(逗号分隔)','text','陆地冰冻区, 绿洲区, +2', row.areas?row.areas.join(', '):'');
+  }
+  if(kind==='region'){
+    const row = isEdit ? dataStore.regions.find(x=>x.id===id) : {};
+    dlgForm.innerHTML =
+      f('name','区域名称*','text','如：渤海湾海岸区',row.name)+
+      f('rtype','区域类型*','text','海岸区/裸地区/植被覆盖…',row.rtype)+
+      f('feat','特征参数(逗号分隔)','text','地貌类型:××, 气候条件:××, +2', row.feat?row.feat.join(', '):'')+
+      f('sets','指标集(逗号分隔)','text','年降水总量, 水质指数, +1', row.sets?row.sets.join(', '):'');
+  }
+  if(kind==='ob'){
+    const row = isEdit ? dataStore.observations.find(x=>x.id===id) : {};
+    dlgForm.innerHTML =
+      f('t','观测时间*','text','YYYY/M/D HH:mm:ss',row.t)+
+      f('area','区域*','text','如：渤海湾海岸区',row.area)+
+      f('rtype','资源类型*','text','气候资源/地表覆盖/水资源/土地资源',row.rtype)+
+      f('ind','指标*','text','年降水总量/水质指数…',row.ind)+
+      f('val','数值*','text','580 mm / 35.8 % …',row.val)+
+      f('src','采集方式*','text','自动监测/实地调查/遥感监测',row.src);
+  }
+}
+function closeDialog(){ mask.style.display='none'; dlgForm.innerHTML=''; dlgCtx={kind:'',id:null}; }
+document.getElementById('mask').addEventListener('click', e=>{ if(e.target.id==='mask') closeDialog(); });
+
+document.getElementById('dlg-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  const $ = id=>document.getElementById(id)?.value?.trim();
+
+  const now = new Date().toISOString().slice(0,19).replace('T',' ');
+  const {kind,id} = dlgCtx;
+  if(kind==='type'){
+    const name=$('name'), cat=$('cat'); if(!name||!cat) return toast('请填写必填项');
+    const desc=$('desc')||'';
+    if(id){ const r=dataStore.types.find(x=>x.id===id); Object.assign(r,{name,cat,desc}); }
+    else{ dataStore.types.unshift({id:Date.now(),name,cat,desc,time:now}); }
+    toast('已保存'); renderTypes(); closeDialog();
+  }
+  if(kind==='indicator'){
+    const name=$('name'), lvl=$('lvl'), rtype=$('rtype'), pol=$('pol'), unit=$('unit'); if(!name||!lvl||!rtype||!pol||!unit) return toast('请填写必填项');
+    const desc=$('desc')||'';
+    if(id){ const r=dataStore.indicators.find(x=>x.id===id); Object.assign(r,{name,lvl,rtype,pol,unit,desc}); }
+    else{ dataStore.indicators.unshift({id:Date.now(),name,lvl,rtype,pol,unit,desc,time:now}); }
+    toast('已保存'); renderIndicators(); closeDialog();
+  }
+  if(kind==='module'){
+    const name=$('name'); if(!name) return toast('请填写必填项');
+    const desc=$('desc')||'', inc=($('inc')||'').split(',').map(s=>s.trim()).filter(Boolean),
+          areas=($('areas')||'').split(',').map(s=>s.trim()).filter(Boolean);
+    if(id){ const r=dataStore.modules.find(x=>x.id===id); Object.assign(r,{name,desc,inc,areas}); }
+    else{ dataStore.modules.unshift({id:Date.now(),name,desc,inc,areas,time:now}); }
+    toast('已保存'); renderModules(); closeDialog();
+  }
+  if(kind==='region'){
+    const name=$('name'), rtype=$('rtype'); if(!name||!rtype) return toast('请填写必填项');
+    const feat=($('feat')||'').split(',').map(s=>s.trim()).filter(Boolean),
+          sets=($('sets')||'').split(',').map(s=>s.trim()).filter(Boolean);
+    if(id){ const r=dataStore.regions.find(x=>x.id===id); Object.assign(r,{name,rtype,feat,sets}); }
+    else{ dataStore.regions.unshift({id:Date.now(),name,rtype,feat,sets,time:now}); }
+    toast('已保存'); renderRegions(); closeDialog();
+  }
+  if(kind==='ob'){
+    const t=$('t'), area=$('area'), rtype=$('rtype'), ind=$('ind'), val=$('val'), src=$('src');
+    if(!t||!area||!rtype||!ind||!val||!src) return toast('请填写必填项');
+    if(id){ const r=dataStore.observations.find(x=>x.id===id); Object.assign(r,{t,area,rtype,ind,val,src}); }
+    else{ dataStore.observations.unshift({id:Date.now(),t,area,rtype,ind,val,src,time:now}); }
+    toast('已保存'); renderObs(); closeDialog();
+  }
+});
+
+/* ========= 6) 提示 ========= */
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1600);
+}
+
+/* ========= 7) 初始渲染 ========= */
+function boot(){
+  renderTypes(); renderIndicators(); renderModules(); renderRegions(); renderObs();
+}
+window.addEventListener('load', boot);
+</script>
 </body>
 </html>
